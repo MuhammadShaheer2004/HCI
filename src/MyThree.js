@@ -1,54 +1,75 @@
-import * as THREE from 'three';
-
+import * as THREE from "three";
 import { useEffect, useRef } from "react";
-import img1 from "./img1.jpeg"
-import img2 from "./img2.jpg"
-import img3 from "./img3.jpg"
 
-
+import img1 from "./img1.jpeg";
+import img2 from "./img2.jpg";
+import img3 from "./img3.jpg";
 
 function MyThree() {
-  
   const refContainer = useRef(null);
+
   useEffect(() => {
-    // === THREE.JS CODE START ===
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    // document.body.appendChild( renderer.domElement );
-    // use ref as a mount point of the Three.js scene instead of the document.body
-    refContainer.current && refContainer.current.appendChild( renderer.domElement );
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var loader = new THREE.TextureLoader();
-    const texture1 = loader.load(img1);
-    const texture2 = loader.load(img2);
-    const texture3 = loader.load(img3);
-    const material = [
-  new THREE.MeshBasicMaterial({ map: texture1 }), // Right
-  new THREE.MeshBasicMaterial({ map: texture2 }), // Left
-  new THREE.MeshBasicMaterial({ map: texture3 }), // Topnew THREE.MeshBasicMaterial({ map: texture1 }), // Right
-  new THREE.MeshBasicMaterial({ map: texture2 }), // Left
-  new THREE.MeshBasicMaterial({ map: texture3 }), // Top
-  
-];
-    
-    var cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    const container = refContainer.current;
+
+    // 🧹 Clear previous canvas (fixes duplicate cube issue)
+    container.innerHTML = "";
+
+    // === Scene ===
+    const scene = new THREE.Scene();
+
+    // === Camera ===
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
     camera.position.z = 5;
-    var animate = function () {
+
+    // === Renderer ===
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+
+    // === Geometry ===
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+
+    // === Textures ===
+    const loader = new THREE.TextureLoader();
+
+    const material = [
+      new THREE.MeshBasicMaterial({ map: loader.load(img1) }),
+      new THREE.MeshBasicMaterial({ map: loader.load(img2) }),
+      new THREE.MeshBasicMaterial({ map: loader.load(img3) }),
+      new THREE.MeshBasicMaterial({ map: loader.load(img3) }),
+      new THREE.MeshBasicMaterial({ map: loader.load(img2) }),
+      new THREE.MeshBasicMaterial({ map: loader.load(img1) }),
+      
+    ];
+
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    // === Animation ===
+    const animate = () => {
       requestAnimationFrame(animate);
+
       cube.rotation.x += 0.01;
       cube.rotation.y += 0.01;
+
       renderer.render(scene, camera);
     };
-    animate();
-  }, []);
-  return (
-    <div ref={refContainer}></div>
 
-  );
+    animate();
+
+    // 🧹 Cleanup (VERY IMPORTANT)
+    return () => {
+      container.innerHTML = "";
+      renderer.dispose();
+    };
+  }, []);
+
+  return <div ref={refContainer}></div>;
 }
 
-
-export default MyThree
+export default MyThree;

@@ -5,7 +5,7 @@ import MyCube from './MyCube'
 
 function App() {
   return (
-    <MyCube />
+    <MyThree />
   );
 }
 
